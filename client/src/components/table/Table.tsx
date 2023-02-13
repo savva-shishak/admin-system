@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Table as MUITable, TextField } from '@material-ui/core';
+import { Button, Drawer, Table as MUITable, TextField } from '@material-ui/core';
 import "./Table.scss"
 import { JustFilter, TableFilter, TableSort, TableType } from "./types";
 import FilterAndSortPng from './filter_and_sort.png';
@@ -42,6 +42,8 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
     setTotalFiltredRows(totalFiltredRows);
     setLoading(false);
   }, [limit, offset, sort, filter, search, excludeNull]);
+
+  const [overlayColumn, setOverlayColumn] = useState<string | null>(null);
 
   useEffect(() => {
     renderData();
@@ -122,90 +124,81 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
       </div>
       <div className="table__content">
         <MUITable>
-          
-        </MUITable>
-        <BootstrapTable style={{ width: 'max-context' }} striped bordered hover>
           <thead>
             <tr>
               {columns.map((column) => (
                 <th key={column.key}  style={{ width: column.width }}>
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {column.title}
-                    <OverlayTrigger
-                      trigger="click"
-                      placement="left"
-                      overlay={(
-                        <Popover id={column.key}>
-                          <Popover.Body>
-                            <div className="table__filter-sort-panel">
-                              <Stack direction="vertical" gap={1} className="table__prop">
-                                Сотрировка
-                                <Stack style={{ width: '100%' }} direction="vertical" gap={1}>
-                                  <Form.Check
-                                    type="radio"
-                                    checked={getSortRadio(column.key) === 'asc'}
-                                    onClick={() => setSortRadio(column.key, 'asc')}
-                                    label="от А до Я"
-                                  />
-                                  <Form.Check
-                                    type="radio"
-                                    checked={getSortRadio(column.key) === 'desc'}
-                                    onClick={() => setSortRadio(column.key, 'desc')}
-                                    label="от Я до А"
-                                  />
-                                  <Form.Check
-                                    type="radio"
-                                    checked={getSortRadio(column.key) === 'not'}
-                                    onClick={() => setSortRadio(column.key, 'not')}
-                                    label="Нет"
-                                  />
-                                </Stack>
-                                Фильтр
-                                <label>
-                                  <Form.Check
-                                    type="checkbox"
-                                    checked={!excludeNull.includes(column.key)}
-                                    onClick={() => {
-                                      setExcludeNull(
-                                        excludeNull.includes(column.key)
-                                          ? excludeNull.filter(item => item !== column.key)
-                                          : [...excludeNull, column.key]
-                                      )
-                                    }}
-                                    style={{ marginRight: 5 }}
-                                  />
-                                  Показать пустые
-                                </label>
-                                {['str', 'password'].includes(column.type) && (
-                                  <StringFilterForm {...inputFiltersProps(column.key)} />
-                                )}
-                                {column.type === 'num' && (
-                                  <NumberFilterForm {...inputFiltersProps(column.key)} />
-                                )}
-                                {column.type === 'date' && (
-                                  <DateFilterForm {...inputFiltersProps(column.key)} />
-                                )}
-                                {column.type === 'enum' && (
-                                  <EnumFilterForm {...inputFiltersProps(column.key)} />
-                                )}
-                              </Stack>
-                            </div>
-                          </Popover.Body>
-                        </Popover>
-
+                    <Drawer
+                      anchor="right"
+                      open={overlayColumn === column.key}
+                      onClose={() => setOverlayColumn(null)}
+                    >
+                      <div className="table__filter-sort-panel">
+                        <div className="table__prop">
+                          Сотрировка
+                          <Stack style={{ width: '100%' }} direction="vertical" gap={1}>
+                            <Form.Check
+                              type="radio"
+                              checked={getSortRadio(column.key) === 'asc'}
+                              onClick={() => setSortRadio(column.key, 'asc')}
+                              label="от А до Я"
+                            />
+                            <Form.Check
+                              type="radio"
+                              checked={getSortRadio(column.key) === 'desc'}
+                              onClick={() => setSortRadio(column.key, 'desc')}
+                              label="от Я до А"
+                            />
+                            <Form.Check
+                              type="radio"
+                              checked={getSortRadio(column.key) === 'not'}
+                              onClick={() => setSortRadio(column.key, 'not')}
+                              label="Нет"
+                            />
+                          </Stack>
+                          Фильтр
+                          <label>
+                            <Form.Check
+                              type="checkbox"
+                              checked={!excludeNull.includes(column.key)}
+                              onClick={() => {
+                                setExcludeNull(
+                                  excludeNull.includes(column.key)
+                                    ? excludeNull.filter(item => item !== column.key)
+                                    : [...excludeNull, column.key]
+                                )
+                              }}
+                              style={{ marginRight: 5 }}
+                            />
+                            Показать пустые
+                          </label>
+                          {['str', 'password'].includes(column.type) && (
+                            <StringFilterForm {...inputFiltersProps(column.key)} />
+                          )}
+                          {column.type === 'num' && (
+                            <NumberFilterForm {...inputFiltersProps(column.key)} />
+                          )}
+                          {column.type === 'date' && (
+                            <DateFilterForm {...inputFiltersProps(column.key)} />
+                          )}
+                          {column.type === 'enum' && (
+                            <EnumFilterForm {...inputFiltersProps(column.key)} />
+                          )}
+                        </Stack>
+                      </div>
+                    </Drawer>
+                    <Button
+                      size="small"
+                      variant={(
+                        sort.concat(filter as any).some(item => item.columnKey === column.key)
+                          ? "contained"
+                          : "outlined"
                       )}
                     >
-                      <Button
-                        size="sm"
-                        variant={(
-                          sort.concat(filter as any).some(item => item.columnKey === column.key)
-                            ? "success"
-                            : "light"
-                        )}
-                      >
-                        <img className="icon" src={FilterAndSortPng} alt="filterandsort" />
-                      </Button>
-                    </OverlayTrigger>
+                      <img className="icon" src={FilterAndSortPng} alt="filterandsort" />
+                    </Button>
                   </div>
                 </th>
               ))}
@@ -224,7 +217,7 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
               ))}
             </tbody>
           )}
-        </BootstrapTable>
+        </MUITable>
         {loading
           && (
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', position: 'absolute', zIndex: +100 }}>

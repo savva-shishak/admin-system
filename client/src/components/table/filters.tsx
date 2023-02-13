@@ -1,4 +1,4 @@
-import { Button, Form, Stack } from "react-bootstrap";
+import { Button, FormControl, InputLabel, Select, TextField } from "@material-ui/core";
 import { useState } from "react";
 import { StringFilter, NumberFilter, DateFilter, EnumFilter } from "./types";
 
@@ -18,20 +18,14 @@ export function StringFilterForm(
       e.preventDefault();
       setValue({ name: 'str', search, notInclude })
     }}>
-      <Stack direction="vertical" gap={2}>
-        <Form.Group>
-          <Form.Label>Искать:</Form.Label>
-          <Form.Control value={search} onChange={(e) => setSearch(e.target.value)} />
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>Исключить:</Form.Label>
-          <Form.Control value={notInclude} onChange={(e) => setNotInclude(e.target.value)} />
-        </Form.Group>
-        <Stack direction="horizontal" gap={1}>
-          <Button size="sm" type="submit">Применить</Button>
-          <Button size="sm" type="button" onClick={onClear}>Очистить</Button>
-        </Stack>
-      </Stack>
+      <div style={{ display: 'flex', gap: 10, flexFlow: 'column' }}>
+        <TextField label="Искать" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <TextField label="Исключить" value={notInclude} onChange={(e) => setNotInclude(e.target.value)} />
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Button size="small" type="submit">Применить</Button>
+          <Button size="small" type="button" onClick={onClear}>Очистить</Button>
+        </div>
+      </div>
     </form>
   );
 }
@@ -50,20 +44,14 @@ export function NumberFilterForm(
       e.preventDefault();
       setValue({ name: 'num', to: +to, from: +from })
     }}>
-      <Stack direction="vertical" gap={2}>
-        <Form.Group>
-          <Form.Label>От:</Form.Label>
-          <Form.Control type="number" onChange={(e) => setFrom(e.target.value)} />
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>До:</Form.Label>
-          <Form.Control type="number" onChange={(e) => setTo(e.target.value)} />
-        </Form.Group>
-        <Stack direction="horizontal" gap={1}>
-          <Button size="sm" type="submit">Применить</Button>
-          <Button size="sm" type="button" onClick={onClear}>Очистить</Button>
-        </Stack>
-      </Stack>
+      <div style={{ display: 'flex', gap: 10, flexFlow: 'column' }}>
+        <TextField label="От" type="number" onChange={(e) => setFrom(e.target.value)} />
+        <TextField label="До" type="number" onChange={(e) => setTo(e.target.value)} />
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Button size="small" type="submit">Применить</Button>
+          <Button size="small" type="button" onClick={onClear}>Очистить</Button>
+        </div>
+      </div>
     </form>
   );
 }
@@ -82,20 +70,14 @@ export function DateFilterForm(
       e.preventDefault();
       setValue({ name: 'date', to: new Date(from), from: new Date(to) })
     }}>
-      <Stack direction="vertical" gap={2}>
-        <Form.Group>
-          <Form.Label>От:</Form.Label>
-          <Form.Control type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>До:</Form.Label>
-          <Form.Control type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-        </Form.Group>
-        <Stack direction="horizontal" gap={1}>
-          <Button size="sm" type="submit">Применить</Button>
-          <Button size="sm" type="button" onClick={onClear}>Очистить</Button>
-        </Stack>
-      </Stack>
+      <div style={{ display: 'flex', gap: 10, flexFlow: 'column' }}>
+        <TextField label="От" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        <TextField label="До" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Button size="small" type="submit">Применить</Button>
+          <Button size="small" type="button" onClick={onClear}>Очистить</Button>
+        </div>
+      </div>
     </form>
   );
 }
@@ -117,26 +99,27 @@ export function EnumFilterForm(
       e.preventDefault();
       setValue({ ...value, filter })
     }}>
-      <Stack direction="vertical" gap={2}>
-      <Form.Group>
-        <Form.Label>
-          Выберите допустимые значения:
-        </Form.Label>
-        <Form.Select
-          style={{ width: '100%' }}
-          multiple
-          onChange={({ target }) => {
-            setFilter(Array.from(target.options).filter((opt) => opt.selected).map((opt) => opt.value))
-          }}
-        >
-          {value.values?.map((item) => <option key={item} value={item}>{item}</option>)}
-        </Form.Select>
-      </Form.Group>
-      <Stack direction="horizontal" gap={1}>
-        <Button type="submit">Применить</Button>
-        <Button type="button" onClick={onClear}>Очистить</Button>
-      </Stack>
-      </Stack>
+      <div style={{ display: 'flex', gap: 10, flexFlow: 'column' }}>
+
+        <FormControl>
+          <InputLabel>
+            Выберите допустимые значения:
+          </InputLabel>
+          <Select
+            style={{ width: '100%' }}
+            multiple
+            onChange={({ target }) => {
+              setFilter((target.value as string).split(','));
+            }}
+          >
+            {value.values?.map((item) => <option key={item} value={item}>{item}</option>)}
+          </Select>
+        </FormControl>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Button type="submit">Применить</Button>
+          <Button type="button" onClick={onClear}>Очистить</Button>
+        </div>
+      </div>
     </form>
   );
 }

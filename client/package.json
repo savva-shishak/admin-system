@@ -9,9 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@date-io/date-fns": "^1.3.13",
     "@material-ui/core": "^4.12.4",
+    "@material-ui/pickers": "^3.3.10",
     "@types/react-toastify": "^4.1.0",
+    "date-fns": "^2.29.3",
     "formik": "^2.2.9",
+    "material-mui-date-range-picker": "^5.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1",

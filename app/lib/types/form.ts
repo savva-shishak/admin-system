@@ -2,26 +2,23 @@ import { Promised } from ".";
 
 export type Input<ValueType = string> = {
   label: string;
-  value: ValueType;
+  value: ValueType | null | undefined;
   name: string,
 }
 
 export type StrInput = Input & {
-  type: 'str' | 'url' | 'markdown' | 'color' | 'phone' | 'email' | 'password',
-  mask?: string,
-  maxLength?: number,
+  type: 'str' | 'url' | 'email' | 'password',
 }
 
 export type RangeInput = Input & {
   type: 'range',
   step?: number,
+  min?: number,
+  max?: number,
 }
 
-export type NumInput = Input & {
+export type NumInput = Input<number> & {
   type: 'num',
-  mask?: string,
-  max?: number,
-  min?: number,
 };
 
 export type FileInput = Input & {
@@ -30,17 +27,24 @@ export type FileInput = Input & {
 };
 
 export type DateInput = Input<Date> & {
-  type: 'date' | 'datetime' | 'time' | 'week' | 'month',
+  type: 'date' | 'datetime' | 'time' | 'range',
 };
+
+export type DateRangeInput = Input<[Date | null, Date | null]> & {
+  type: 'daterange',
+  startText?: string,
+  endText?: string,
+  middleText?: string,
+}
 
 export type SelectInput = Input & {
   type: 'select',
-  getValues: (string | { label: string, value: string })[],
+  values: (string | { label: string, value: string })[],
 };
 
 export type MultiSelectInput = Input<string[]> & {
   type: 'multiselect',
-  getValues: (string | { label: string, value: string })[],
+  values: (string | { label: string, value: string })[],
 };
 
 export type CheckInput = Input<boolean> & {
@@ -55,6 +59,8 @@ export type InputForm = (
   | SelectInput
   | CheckInput
   | RangeInput
+  | SelectInput
+  | MultiSelectInput
 );
 
 export type FormType = {

@@ -1,16 +1,18 @@
-import { CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress } from "@material-ui/core";
+import moment from "moment";
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { v4 } from "uuid";
 import { socket } from "../App";
+import { AdaptTable } from "./AdaptTable";
+import { Form } from "./form";
 import { Table } from "./table/Table";
 
-export function Page({ content, path }: { content: any[], path: string }) {
+export function Page({ content, path }: { content: any[], path: string }): any {
   const params = useParams();
   const location = useLocation();
 
   const [loading, setLoading] = useState(true);
-
-  console.log(content);
 
   useEffect(() => {
     socket.emit('admin-message', { target: 'load', path, params });
@@ -25,12 +27,18 @@ export function Page({ content, path }: { content: any[], path: string }) {
   }
 
   return content.map((component, id) => {
+    console.log(component);
+    
     if (component.type === 'html') {
-      return <div key={id} dangerouslySetInnerHTML={{ __html: component.payload }} />
+      return <div key={Math.random()} dangerouslySetInnerHTML={{ __html: component.payload }} />
+    }
+
+    if (component.type === 'form') {
+      return <Form key={Math.random()} config={component.config} />
     }
 
     if (component.type === 'table') {
-      return <Table columns={component.columns} getData={async () => ({ data: [], totalFiltredRows: 0, totalRows: 0 })} />
+      return <AdaptTable key={Math.random()} config={component.config} />
     }
   })
 }

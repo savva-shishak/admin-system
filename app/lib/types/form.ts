@@ -1,9 +1,9 @@
 import { Promised } from ".";
 
-export type Input<ValueType = string> = Element & {
+export type Input<ValueType = string> = {
   label: string;
-  value: () => Promised<ValueType>;
-  onChange: (value: ValueType) => Promised<void>;
+  value: ValueType;
+  name: string,
 }
 
 export type StrInput = Input & {
@@ -59,9 +59,10 @@ export type InputForm = (
 
 export type FormType = {
   inputs: InputForm[];
+  columns?: number,
   buttons: {
     label: string,
-    onClick: () => Promised<void>,
+    onClick: (...params: any) => Promised<void>,
     type: 'primary' | 'secondary' | 'danger',
   }[];
 };

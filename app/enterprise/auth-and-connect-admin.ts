@@ -20,7 +20,7 @@ export type ClientData = {
 
 export const admin = new Admin<ClientData>();
 
-const users: User[] = [
+export const users: User[] = [
   {
     id: 'test',
     login: 'test login',

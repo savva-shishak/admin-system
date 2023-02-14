@@ -1,6 +1,6 @@
 import { reduceForm } from "./reduce-components/form";
 import { reduceTable } from "./reduce-components/table";
-import { PageType, Promised } from "./types";
+import { Api, PageType, Promised } from "./types";
 
 export type AdminParams = {
   messageListen: (data: any) => any;
@@ -29,6 +29,8 @@ export type ClientAction = {
 export class Admin<ClientData extends object = any> {
   public readonly pages: PageType<ClientData>[] = [];
 
+  public clients: {}[] = [];
+
   public createClient(
     getClientData: () => Promised<ClientData>,
     sendToClient: (data: any) => any,
@@ -37,7 +39,12 @@ export class Admin<ClientData extends object = any> {
 
     let actions: ClientAction[] = [];
 
-    return {
+    const client =  {
+      getClientData,
+      sendToClient,
+      close() {
+        ths.clients = ths.clients.filter((c) => client !== c)
+      },
       async emitMessage(message: ClientMessage) {
         const clientData = await getClientData();
 
@@ -50,6 +57,8 @@ export class Admin<ClientData extends object = any> {
               action: message.respondId,
               data: await action.handler(message.params)
             })
+          } else {
+            sendToClient('action not found')
           }
           return;
         }
@@ -83,12 +92,21 @@ export class Admin<ClientData extends object = any> {
 
           actions = [];
 
+          const api: Api = {
+            navigate(href) {
+              sendToClient({ target: 'navigate', href });
+            },
+            notify(message, options) {
+              sendToClient({ target: 'notify', message, options });
+            }
+          }
+
           sendToClient({
             target: 'page',
             title: typeof page.title === 'function' 
               ? await page.title(message.params, clientData)
               : page.title,
-            content: (await page.content(message.params, clientData))
+            content: (await page.content(message.params, clientData, api))
               .map((item) => {
                 if (typeof item === 'string' || typeof item === 'number') {
                   return { type: 'html', payload: item };
@@ -111,5 +129,9 @@ export class Admin<ClientData extends object = any> {
         }
       },
     }
+
+    this.clients.push(client);
+
+    return client;
   }
 }

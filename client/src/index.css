@@ -23,3 +23,10 @@ body,
   overflow: hidden;
   padding: 0;
 }
+
+.icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  object-position: center;
+}

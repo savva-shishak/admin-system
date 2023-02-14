@@ -4,7 +4,7 @@ import { httpServer } from "./app/context";
 import { sequelize } from "./app/context/database";
 import logger from './logger';
 
-import "./app/testapp";
+import "./app/enterprise";
 
 async function runServers() {
   await Promise.all([

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Drawer, Table as MUITable, TextField } from '@material-ui/core';
+import { Button, Checkbox, Drawer, FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, Table as MUITable, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@material-ui/core';
 import "./Table.scss"
 import { JustFilter, TableFilter, TableSort, TableType } from "./types";
 import FilterAndSortPng from './filter_and_sort.png';
@@ -100,8 +100,6 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
     )
   }
 
-  console.log(columns);
-
   return (
     <div className="table-container">
       <div className="table__header">
@@ -110,7 +108,7 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
             e.preventDefault();
             setSearch((e.target as any).elements.search.value)
           }}>
-            <div>
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
               <TextField name="search" label="Поиск" />
               <Button type="submit">
                 <img className="icon" src={SearchPng} alt="search" />
@@ -124,98 +122,92 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
       </div>
       <div className="table__content">
         <MUITable>
-          <thead>
-            <tr>
+          <TableHead>
+            <TableRow>
               {columns.map((column) => (
-                <th key={column.key}  style={{ width: column.width }}>
+                <TableCell key={column.key}  style={{ width: column.width }}>
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {column.title}
+                    <Button
+                      size="small"
+                      variant={(
+                        sort.concat(filter as any).some(item => item.columnKey === column.key)
+                        || excludeNull.includes(column.key)
+                          ? "contained"
+                          : "outlined"
+                      )}
+                      onClick={() => setOverlayColumn(column.key)}
+                    >
+                      <img className="icon" src={FilterAndSortPng} alt="filterandsort" />
+                    </Button>
                     <Drawer
                       anchor="right"
                       open={overlayColumn === column.key}
                       onClose={() => setOverlayColumn(null)}
                     >
-                      <div className="table__filter-sort-panel">
+                      <div className="table__column-params">
                         <div className="table__prop">
-                          Сотрировка
-                          <Stack style={{ width: '100%' }} direction="vertical" gap={1}>
-                            <Form.Check
-                              type="radio"
-                              checked={getSortRadio(column.key) === 'asc'}
-                              onClick={() => setSortRadio(column.key, 'asc')}
-                              label="от А до Я"
-                            />
-                            <Form.Check
-                              type="radio"
-                              checked={getSortRadio(column.key) === 'desc'}
-                              onClick={() => setSortRadio(column.key, 'desc')}
-                              label="от Я до А"
-                            />
-                            <Form.Check
-                              type="radio"
-                              checked={getSortRadio(column.key) === 'not'}
-                              onClick={() => setSortRadio(column.key, 'not')}
-                              label="Нет"
-                            />
-                          </Stack>
-                          Фильтр
-                          <label>
-                            <Form.Check
-                              type="checkbox"
-                              checked={!excludeNull.includes(column.key)}
-                              onClick={() => {
-                                setExcludeNull(
-                                  excludeNull.includes(column.key)
-                                    ? excludeNull.filter(item => item !== column.key)
-                                    : [...excludeNull, column.key]
-                                )
-                              }}
-                              style={{ marginRight: 5 }}
-                            />
-                            Показать пустые
-                          </label>
-                          {['str', 'password'].includes(column.type) && (
-                            <StringFilterForm {...inputFiltersProps(column.key)} />
-                          )}
-                          {column.type === 'num' && (
-                            <NumberFilterForm {...inputFiltersProps(column.key)} />
-                          )}
-                          {column.type === 'date' && (
-                            <DateFilterForm {...inputFiltersProps(column.key)} />
-                          )}
-                          {column.type === 'enum' && (
-                            <EnumFilterForm {...inputFiltersProps(column.key)} />
-                          )}
-                        </Stack>
+                          <Typography variant="h5">
+                            Параметры колонки <br/> "{column.title}""
+                          </Typography>
+                          <FormGroup>
+                            <FormControl>
+                              <FormLabel>Сотрировка</FormLabel>
+                              <RadioGroup value={getSortRadio(column.key)} onChange={(e) => setSortRadio(column.key, e.target.value as any)}>
+                                <FormControlLabel control={<Radio />} value="asc" label="от А до Я" />
+                                <FormControlLabel control={<Radio />} value="desc" label="от Я до А" />
+                                <FormControlLabel control={<Radio />} value="not" label="Нет" />
+                              </RadioGroup>
+                            </FormControl>
+                            Фильтр
+                            <FormControlLabel 
+                              control={
+                                <Checkbox
+                                  checked={!excludeNull.includes(column.key)}
+                                  onClick={() => {
+                                    setExcludeNull(
+                                      excludeNull.includes(column.key)
+                                        ? excludeNull.filter(item => item !== column.key)
+                                        : [...excludeNull, column.key]
+                                    )
+                                  }}
+                                />
+                              }
+                              label="Показать пустые"
+                              />
+                            {['str', 'password'].includes(column.type) && (
+                              <StringFilterForm {...inputFiltersProps(column.key)} />
+                            )}
+                            {column.type === 'num' && (
+                              <NumberFilterForm {...inputFiltersProps(column.key)} />
+                            )}
+                            {column.type === 'date' && (
+                              <DateFilterForm {...inputFiltersProps(column.key)} />
+                            )}
+                            {column.type === 'enum' && (
+                              <EnumFilterForm {...inputFiltersProps(column.key)} />
+                            )}
+                          </FormGroup>
+                        </div>
                       </div>
                     </Drawer>
-                    <Button
-                      size="small"
-                      variant={(
-                        sort.concat(filter as any).some(item => item.columnKey === column.key)
-                          ? "contained"
-                          : "outlined"
-                      )}
-                    >
-                      <img className="icon" src={FilterAndSortPng} alt="filterandsort" />
-                    </Button>
                   </div>
-                </th>
+                </TableCell>
               ))}
-            </tr>
-          </thead>
+            </TableRow>
+          </TableHead>
           {!loading && (
-            <tbody>
+            <TableBody>
               {data.map((item, index) => (
-                <tr key={index}>
+                <TableRow key={index}>
                   {columns.map((column) => (
-                    <td key={column.key} style={{ width: column.width }}>
+                    <TableCell key={column.key} style={{ width: column.width }}>
                       {column.render(item, index)}
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
+            </TableBody>
           )}
         </MUITable>
         {loading
@@ -227,18 +219,16 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
       </div>
       <div className="table__footer">
         Показывать
-        <Form.Control
+        <TextField 
           style={{ width: '60px' }}
           type="number"
-          min="0"
-          max={totalRows}
           value={limit}
           onChange={(e) => setLimit(e.target.value)}
         />
         Показаны
         <Button
-          size="sm"
-          variant="light"
+          size="small"
+          variant="text"
           disabled={offset === 0}
           onClick={() => setOffset(Math.max(offset - +limit, 0))}
           onDoubleClick={() => setOffset(0)}
@@ -249,8 +239,8 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
           {offset + 1} - {Math.min(offset + +limit, totalFiltredRows)}
         </div>
         <Button
-          size="sm"
-          variant="light"
+          size="small"
+          variant="text"
           disabled={totalFiltredRows <= +offset + +limit}
           onClick={() => setOffset(offset + +limit)}
           onDoubleClick={() => setOffset(totalFiltredRows - +limit)}

@@ -1,3 +1,4 @@
+import { ToastOptions } from "react-toastify";
 import { FormType } from "./form";
 import { TableType } from "./tables";
 
@@ -15,11 +16,16 @@ export type ComponentsContentType = (
   | (FormType & { type: 'form' })
 );
 
+export type Api = {
+  navigate: (href: string) => void;
+  notify: (message: string, options?: ToastOptions) => void
+}
+
 export type PageType<Client> = {
   readonly path: string,
   readonly title: string | ((params: any, client: Client) => Promised<string>),
   readonly auth?: (params: any, client: Client) => Promised<boolean>,
-  content: (params: any, client: Client) => Promised<ComponentsContentType[]>,
+  content: (params: any, client: Client, api: Api) => Promised<ComponentsContentType[]>,
   menu?: {
     title: string,
     icon?: string,

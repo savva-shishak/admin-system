@@ -18,16 +18,15 @@ export function reduceTable(table: TableType<any>, addAction: (action: ClientAct
           addAction({ id, handler: (column as any).onChange.bind(column) })
           return {
             ...column,
-            getData: getDataid,
             onChange: id,
           };
         }
 
         return {
           ...column,
-          getData: getDataid,
         };
       }),
+      getData: getDataid,
     },
   };
 }

@@ -1,6 +1,8 @@
-import { Button } from '@material-ui/core';
+import { Button, CircularProgress } from '@material-ui/core';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useEffect, useState } from 'react'
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import './App.css';
 import { Page } from './components/Page';
@@ -14,12 +16,15 @@ function App() {
   const [paths, setPaths] = useState<string[]>([]);
   const [menu, setMenu] = useState<{ title: string, icon?: string, path: string }[]>([]);
   const [content, setContent] = useState<any[]>([]);
+  const [loading, setLoading] = useState(!localStorage.getItem('token'))
+  const navigate = useNavigate();
 
   useEffect(() => {
     socket.on('auth-success', (token) => {
       localStorage.setItem('token', token)
       socket.emit('admin-message', { target: 'get-paths' });
       setOpenLogin(false);
+      setLoading(false);
     });
     socket.on('auth-error', () => {
       setOpenLogin(true);
@@ -40,14 +45,34 @@ function App() {
         document.title = data.title;
         setContent(data.content);
       }
+      if (target === 'navigate') {
+        navigate(data.href)
+      }
+      if (target === 'notify') {
+        console.log(target);
+        toast(data.message, data.options)
+      }
     });
 
-    if (localStorage.getItem('token')) {
-      socket.emit('auth', { authCase: 'token', token: localStorage.getItem('token') });
-    }
+    socket.on('disconnect', () => {
+      setLoading(true);
+      setContent([]);
+      setPaths([]);
+    });
+
+    socket.on('connect', () => {
+      setLoading(false);
+      if (localStorage.getItem('token')) {
+        socket.emit('auth', { authCase: 'token', token: localStorage.getItem('token') });
+      }
+    });
   }, []);
 
-  return (
+  if (loading) {
+    return <CircularProgress />
+  }
+
+  return (<>
     <div className="App">
       <div className="App__login" style={{ top: openLogin ? 0 : '-100vh' }}>
         <Login
@@ -55,8 +80,8 @@ function App() {
             socket.emit('auth', data);
 
             return new Promise<number>((res) => socket.once('auth-error', res));
-          }}  
-         />
+          }}
+        />
       </div>
       <div className="App__header">
         <div className="App__toggle-menu" onClick={() => setOpenLeftMenu(!openLeftMenu)}>
@@ -64,7 +89,7 @@ function App() {
           <span></span>
           <span></span>
         </div>
-        <Button 
+        <Button
           variant="text"
           type="button"
           style={{ color: 'white' }}
@@ -80,7 +105,7 @@ function App() {
       <div className="App__left" style={{ width: openLeftMenu ? 200 : 0 }}>
         <div className="App__left-menu">
           {menu.map(({ title, icon, path }) => (
-            <Link 
+            <Link
               className="App__left-menu-item"
               to={path}
               key={path}
@@ -94,15 +119,17 @@ function App() {
       <div className="App__body">
         <Routes>
           {paths.map((path) => (
-            <Route 
+            <Route
               key={path}
               path={path}
-              element={<Page content={content} path={path} />}
+              element={<><Page content={content} path={path} /></>}
             />
           ))}
         </Routes>
       </div>
     </div>
+    <ToastContainer />
+  </>
   )
 }
 

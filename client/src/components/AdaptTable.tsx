@@ -1,8 +1,12 @@
+import { Button, IconButton } from "@material-ui/core";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { v4 } from "uuid";
 import { socket } from "../App";
+import { TableCheckbox } from "./table-columns/checkbox";
 import { Table } from "./table/Table";
+import { FileCopy } from '@material-ui/icons';
+import { toast } from "react-toastify";
 
 export function AdaptTable({ config }: any) {
   const navigate = useNavigate();
@@ -46,32 +50,39 @@ export function AdaptTable({ config }: any) {
             return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <img src={row[column.key]} alt={column.key} style={{ height: 50, width: 'auto' }} />
-                {/* <a href={row[column.key]} target="_blank">
-                  <Button variant="light" size="sm">
-                    <img src={DownloadIcon} className="icon" />
+                <a href={row[column.key]} target="_blank">
+                  <Button size="small">
+                    Скачать
                   </Button>
-                </a> */}
+                </a>
               </div>
             )
           }
 
-          // if (column.type === 'key') {
-          //   return (
-          //     <div>
-          //       <Button variant="light" style={{ marginRight: 10 }} size="sm" onClick={() => navigator.clipboard.writeText(row[column.key])}>
-          //         <img src={CopyIcon} className="icon" />
-          //       </Button>
-          //       {row[column.key].slice(0, 5)}
-          //       ...
-          //     </div>
-          //   )
-          // }
+          if (column.type === 'key') {
+            return (
+              <div>
+                <IconButton
+                  style={{ marginRight: 10 }}
+                  size="small"
+                  onClick={() => {
+                    navigator.clipboard.writeText(row[column.key]);
+                    toast.info('Скопировано')
+                  }}
+                >
+                  <FileCopy />
+                </IconButton>
+                {row[column.key].slice(0, 5)}
+                ...
+              </div>
+            )
+          }
 
-          // if (column.type === 'checkbox') {
-          //   return (
-          //     <AdminCheckbox value={row[column.key]} row={row} actionId={column.onChange} />
-          //   );
-          // }
+          if (column.type === 'check') {
+            return (
+              <TableCheckbox value={row[column.key]} row={row} actionId={column.onChange} />
+            );
+          }
 
           // if (column.type === 'select') {
           //   return (

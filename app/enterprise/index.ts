@@ -1,135 +1,107 @@
+import moment from "moment";
+import { Model } from "sequelize";
+import { mainRouter } from "../context";
 import { reduceArrayByParams } from "../lib/tables/reduceArrayByParams";
+import { sequlizeQueryByParams } from "../lib/tables/sequlizeQueryByParams";
 import { InputForm } from "../lib/types";
 import { admin, users } from "./auth-and-connect-admin";
+import { Log } from "./log";
 
 admin.pages.push({
   path: '/',
-  menu: {
-    title: 'Главная',
-    icon: 'http://localhost:8080/static/home.png'
-  },
-  title: ({}, client) => `Добро пожаловать, ${client.user.name}!!!`,
-  async content({}, client, api) {
+  title: 'Журнал событий',
+  content(params, client, api) {
     return [
       {
         type: 'table',
         columns: [
           {
-            key: 'name',
-            title: 'Имя',
+            key: 'id',
+            title: 'ID',
+            type: 'num',
+          },
+          {
+            key: 'text',
+            title: 'Информация',
             type: 'str',
           },
           {
-            key: 'login',
-            title: 'Логин',
+            key: 'type',
+            title: 'Тип события',
+            type: 'enum',
+            values: ['info', 'error', 'warning', 'success'],
+          },
+          {
+            key: 'datetime',
+            title: 'Дата и время',
+            type: 'date',
+            format: 'DD.MM.YYYY hh:mm:ss'
+          },
+          {
+            key: 'roomId',
+            title: 'Комната',
+            type: 'str',
+          },
+          {
+            key: 'peerId',
+            title: 'ID пользователя',
+            type: 'key',
+          },
+          {
+            key: 'displayName',
+            title: 'Имя пользователя',
+            type: 'str',
+          },
+          {
+            key: 'browser',
+            title: 'Браузер',
             type: 'str',
           },
           {
             key: 'avatar',
             title: 'Аватар',
             type: 'img',
-          },
-        ],
-        getData: reduceArrayByParams(() => users)
-      },
-    ];
-  }
-});
-
-admin.pages.push({
-  path: '/form',
-  menu: {title: 'Формочка'},
-  title: 'Формочка',
-  content(_, __, api) {
-    return [
-      {
-        type: 'form',
-        inputs: [
-          {
-            type: 'str',
-            label: 'test',
-            name: 'testField',
-            value: '',
-          },
-          {
-            type: 'str',
-            label: 'test',
-            name: 'testField',
-            value: '',
-          },
-          {
-            type: 'range',
-            label: 'test',
-            name: 'testField3',
-            value: '',
-            step: 5,
-          },
-          {
-            type: 'num',
-            label: 'test',
-            name: 'testField4',
-            value: '',
-            mask: '+#(###) ###-##-##'
-          },
-          {
-            type: 'file',
-            label: 'test',
-            name: 'testField5',
-            value: '',
-            accept: 'image/*',
-          },
-          {
-            type: 'daterange',
-            label: 'test',
-            name: 'testFielddate',
-            value: [null, null],
-          },
-          {
-            type: 'select',
-            label: 'test',
-            name: 'testField',
-            value: null,
-            values: [
-              'option1',
-              'option2',
-              'option3',
-            ],
-          },
-          {
-            type: 'multiselect',
-            label: 'test',
-            name: 'testField8',
-            value: ['option1'],
-            values: [
-              'option1',
-              'option2',
-              'option3',
-            ],
-          },
-          {
-            type: 'check',
-            label: 'test',
-            name: 'testField9',
-            value: true,
-          },
-          {
-            type: 'switch',
-            label: 'test',
-            name: 'testField9',
-            value: false,
-          },
-        ] as InputForm[],
-        buttons: [
-          {
-            type: 'primary',
-            label: 'Первая кнопка',
-            onClick(data: any) {
-              api.notify(`Вы написали ${data.testField}, а теперь пиздуйте на другую страницу`, { type: 'info' });
-              api.navigate('/')
-            },
           }
         ],
-      },
+        getData: sequlizeQueryByParams(
+          Log,
+          [
+            'displayName',
+            'browser',
+            'text',
+            'roomId'
+          ],
+          // (item) => ({
+          //   id: item.id,
+          //   peerId: item.peerId.slice(0, 5) + '...',
+          //   displayName: item.displayName,
+          //   datetime: item.datetime,
+          //   type: item.type,
+          //   browser: item.browser,
+          //   text: item.text,
+          //   roomId: item.roomId,
+          //   avatar: 'https://w7.pngwing.com/pngs/805/207/png-transparent-account-avatar-profile-user-avatars-icon.png'
+          // })
+        )
+      }
     ]
+  },
+})
+
+mainRouter.post('/add-logs', async (ctx) => {
+  const logs = ctx.request.body as Omit<Log, keyof Model>[];
+
+  console.log(logs);
+  
+
+  try {
+    await Log.bulkCreate(logs);
+  
+    ctx.status = 204;
+  } catch (e) {
+    ctx.status = 400;
+    console.log(e);
+    
+    ctx.body = e;
   }
 })

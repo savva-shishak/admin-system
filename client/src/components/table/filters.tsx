@@ -1,4 +1,4 @@
-import { Button, FormControl, InputLabel, Select, TextField } from "@material-ui/core";
+import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 import { useState } from "react";
 import { StringFilter, NumberFilter, DateFilter, EnumFilter } from "./types";
 
@@ -93,7 +93,7 @@ export function EnumFilterForm(
     onClear
   }: StateValue<EnumFilter>
 ) {
-  const [filter, setFilter] = useState(value.filter);
+  const [filter, setFilter] = useState(value.filter || []);
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
@@ -108,11 +108,14 @@ export function EnumFilterForm(
           <Select
             style={{ width: '100%' }}
             multiple
+            value={filter}
             onChange={({ target }) => {
-              setFilter((target.value as string).split(','));
+              console.log(target.value);
+              
+              setFilter(typeof target.value === 'string' ? target.value.split(',') : target.value as any);
             }}
           >
-            {value.values?.map((item) => <option key={item} value={item}>{item}</option>)}
+            {value.values?.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
           </Select>
         </FormControl>
         <div style={{ display: 'flex', gap: 10 }}>

@@ -13,7 +13,7 @@ export function reduceTable(table: TableType<any>, addAction: (action: ClientAct
       ...table,
       columns: table.columns.map((column) => {
 
-        if (['checkbox', 'input', 'select', 'multiselect'].includes(column.type)) {
+        if (['check', 'input', 'select', 'multiselect'].includes(column.type)) {
           const id = v4();
           addAction({ id, handler: (column as any).onChange.bind(column) })
           return {

@@ -8,7 +8,7 @@ import "./app/enterprise";
 
 async function runServers() {
   await Promise.all([
-    // sequelize.sync(),
+    sequelize.sync(),
     new Promise<void>((res) => httpServer.listen(process.env.SERVER_PORT || 8080, res))
   ]);
 

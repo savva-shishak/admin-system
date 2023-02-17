@@ -6,7 +6,6 @@ import { v4 } from "uuid";
 import { socket } from "../App";
 import { AdaptTable } from "./AdaptTable";
 import { Form } from "./form";
-import { Table } from "./table/Table";
 
 export function Page({ content, path }: { content: any[], path: string }): any {
   const params = useParams();
@@ -27,18 +26,16 @@ export function Page({ content, path }: { content: any[], path: string }): any {
   }
 
   return content.map((component, id) => {
-    console.log(component);
-    
     if (component.type === 'html') {
-      return <div key={Math.random()} dangerouslySetInnerHTML={{ __html: component.payload }} />
+      return <div key={id} dangerouslySetInnerHTML={{ __html: component.payload }} />
     }
 
     if (component.type === 'form') {
-      return <Form key={Math.random()} config={component.config} />
+      return <Form key={id} config={component.config} />
     }
 
     if (component.type === 'table') {
-      return <AdaptTable key={Math.random()} config={component.config} />
+      return <AdaptTable key={id} config={component.config} />
     }
   })
 }

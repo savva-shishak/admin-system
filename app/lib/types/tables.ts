@@ -45,17 +45,19 @@ export type Column<Data> = (
           | 'key'
           | 'img'
           | 'file'
-          | 'date',
     }
     | {
       type: 'enum',
       values: string[],
     }
+    | {
+      type: 'date',
+      format: string,
+    }
     | (
       Omit<InputForm, (keyof Input)>
       & {
-        value: (row: Data) => Promised<Data>,
-        onChange: (newValue: string) => Promised<void>,
+        onChange: (p: { row: Data, newValue: any }) => Promised<void>,
       }
     )
   )

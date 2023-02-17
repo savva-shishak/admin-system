@@ -7,8 +7,25 @@ import { io } from 'socket.io-client';
 import './App.css';
 import { Page } from './components/Page';
 import { Login } from './login/Login';
+import { v4 } from 'uuid';
 
 export const socket = io('http://localhost:8080');
+
+export function sendAction(actionId: string, params: any) {
+  return new Promise((res) => {
+    const id = v4();
+    socket.emit('admin-message', { target: 'action', actionId, respondId: id, params })
+    
+    socket.on('admin-message', onAction)
+
+    function onAction(data: any) {
+      if (data.target === 'action' && data.action === id) {
+        socket.off('admin-message', onAction);
+        res(data.data);
+      }
+    }
+  });
+}
 
 function App() {
   const [openLeftMenu, setOpenLeftMenu] = useState(true);
@@ -84,11 +101,19 @@ function App() {
         />
       </div>
       <div className="App__header">
-        <div className="App__toggle-menu" onClick={() => setOpenLeftMenu(!openLeftMenu)}>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+        {
+          menu.length
+          ? (
+            <div className="App__toggle-menu" onClick={() => setOpenLeftMenu(!openLeftMenu)}>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          )
+          : (
+            <div />
+          )
+        }
         <Button
           variant="text"
           type="button"
@@ -102,7 +127,7 @@ function App() {
           Выйти
         </Button>
       </div>
-      <div className="App__left" style={{ width: openLeftMenu ? 200 : 0 }}>
+      <div className="App__left" style={{ width: openLeftMenu && menu.length ? 200 : 0 }}>
         <div className="App__left-menu">
           {menu.map(({ title, icon, path }) => (
             <Link

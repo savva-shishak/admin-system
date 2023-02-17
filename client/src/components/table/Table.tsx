@@ -125,7 +125,7 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
           <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell key={column.key}  style={{ width: column.width }}>
+                <TableCell key={column.key} size={column.width as any}>
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {column.title}
                     <Button

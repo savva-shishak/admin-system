@@ -41,7 +41,6 @@ export type Column<Data> = (
     {
       type: 'num'
           | 'str'
-          | 'link'
           | 'key'
           | 'img'
           | 'file'
@@ -49,6 +48,10 @@ export type Column<Data> = (
     | {
       type: 'enum',
       values: string[],
+    }
+    | {
+      type: 'link',
+      target?: string,
     }
     | {
       type: 'date',

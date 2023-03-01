@@ -1,6 +1,5 @@
 import { Button, IconButton } from "@material-ui/core";
 import moment from "moment";
-import { useNavigate } from "react-router-dom";
 import { v4 } from "uuid";
 import { socket } from "../App";
 import { TableCheckbox } from "./table-columns/checkbox";
@@ -9,7 +8,6 @@ import { FileCopy } from '@material-ui/icons';
 import { toast } from "react-toastify";
 
 export function AdaptTable({ config }: any) {
-  const navigate = useNavigate();
   return (
     <Table
       columns={config.columns.map((column: any) => ({
@@ -17,6 +15,7 @@ export function AdaptTable({ config }: any) {
         title: column.title,
         type: ['anchor', 'password'].includes(column.type) ? 'str' : column.type as any,
         values: column.values,
+        width: column.width,
         render(row: any) {
           if (row[column.key] === null || row[column.key] === undefined) {
             return null;
@@ -26,24 +25,10 @@ export function AdaptTable({ config }: any) {
             return moment(row[column.key]).format(column.format)
           }
 
-          if (column.type === 'anchor') {
-            const { href, label } = row[column.key];
+          if (column.type === 'link') {
+            const { href, label, target } = row[column.key];
 
-            if (href.startsWith('http')) {
-              return <a href={href} target="_blank">{label}</a>
-            } else {
-              return (
-                <a
-                  href={href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(href);
-                  }}
-                >
-                  {label}
-                </a>
-              );
-            }
+            return <a href={href} target={target}>{label}</a>
           }
 
           if (column.type === 'img') {

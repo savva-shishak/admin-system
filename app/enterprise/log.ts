@@ -1,5 +1,16 @@
-import { DATE, INTEGER, Model, STRING, TEXT } from "sequelize";
+import { DATE, INTEGER, Model, STRING, TEXT, JSONB } from "sequelize";
 import { sequelize } from "../context/database";
+
+export type UserAgentInfo = {
+  isMobile: boolean,
+  isDesktop: boolean,
+  isBot: boolean,
+  browser: string,
+  version: string,
+  os: string,
+  platform: string,
+  source: string,
+}
 
 export class Log extends Model {
   declare id: number;
@@ -11,7 +22,7 @@ export class Log extends Model {
 
   declare type: 'info' | 'error' | 'warning' | 'success';
 
-  declare browser: string;
+  declare userAgent: UserAgentInfo;
 
   declare text: string;
 
@@ -34,8 +45,8 @@ Log.init(
     type: {
       type: STRING,
     },
-    browser: {
-      type: STRING,
+    userAgent: {
+      type: JSONB,
     },
     text: {
       type: TEXT,
@@ -49,5 +60,6 @@ Log.init(
   },
   {
     sequelize,
+    tableName: 'logs'
   },
 );

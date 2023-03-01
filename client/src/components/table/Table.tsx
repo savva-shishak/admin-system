@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Checkbox, Drawer, FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, Table as MUITable, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Drawer, FormControl, FormControlLabel, FormGroup, FormLabel, IconButton, InputAdornment, Radio, RadioGroup, Table as MUITable, TableBody, TableCell, TableFooter, TableHead, TablePagination, TableRow, TextField, Typography } from '@material-ui/core';
 import "./Table.scss"
 import { JustFilter, TableFilter, TableSort, TableType } from "./types";
-import FilterAndSortPng from './filter_and_sort.png';
-import UpdatePng from './update.png';
-import SearchPng from './search.png';
-import LeftPng from './left.png';
-import RightPng from './right.png';
 import LoadingPng from './loading.gif';
 import { DateFilterForm, EnumFilterForm, NumberFilterForm, StringFilterForm } from "./filters";
+import TuneIcon from '@material-ui/icons/Tune';
+import { FirstPage, KeyboardArrowLeft, KeyboardArrowRight, LastPage, Search, Update } from "@material-ui/icons";
 
 export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>) {
   const [totalRows, setTotalRows] = useState(0);
@@ -108,16 +105,21 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
             e.preventDefault();
             setSearch((e.target as any).elements.search.value)
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <TextField name="search" label="Поиск" />
-              <Button type="submit">
-                <img className="icon" src={SearchPng} alt="search" />
-              </Button>
-            </div>
+            <TextField 
+              name="search"
+              label="Поиск"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Search />
+                  </InputAdornment>
+                )
+              }}
+            />
           </form>
-          <Button onClick={renderData}>
-            <img className="icon" src={UpdatePng} alt="update" />
-          </Button>
+          <IconButton onClick={renderData}>
+            <Update />
+          </IconButton>
         </div>
       </div>
       <div className="table__content">
@@ -125,21 +127,22 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
           <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell key={column.key} size={column.width as any}>
-                  <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <TableCell key={column.key} style={{ width: column.width }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
                     {column.title}
-                    <Button
+                    <IconButton
                       size="small"
-                      variant={(
+                      color={(
                         sort.concat(filter as any).some(item => item.columnKey === column.key)
                         || excludeNull.includes(column.key)
-                          ? "contained"
-                          : "outlined"
+                          ? "primary"
+                          : "default"
                       )}
+                      
                       onClick={() => setOverlayColumn(column.key)}
                     >
-                      <img className="icon" src={FilterAndSortPng} alt="filterandsort" />
-                    </Button>
+                      <TuneIcon />
+                    </IconButton>
                     <Drawer
                       anchor="right"
                       open={overlayColumn === column.key}
@@ -148,7 +151,7 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
                       <div className="table__column-params">
                         <div className="table__prop">
                           <Typography variant="h5">
-                            Параметры колонки <br/> "{column.title}""
+                            Параметры столбца <br/> "{column.title}""
                           </Typography>
                           <FormGroup>
                             <FormControl>
@@ -209,47 +212,52 @@ export function Table<Data = any>({ columns, getData, itemRef }: TableType<Data>
               ))}
             </TableBody>
           )}
+          {loading
+            && (
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', position: 'absolute', zIndex: +100 }}>
+                <img style={{ height: 300 }} src={LoadingPng} alt="loading" />
+              </div>
+            )}
+            <TableFooter>
+            </TableFooter>
         </MUITable>
-        {loading
-          && (
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', position: 'absolute', zIndex: +100 }}>
-              <img style={{ height: 300 }} src={LoadingPng} alt="loading" />
-            </div>
-          )}
       </div>
       <div className="table__footer">
-        Показывать
-        <TextField 
-          style={{ width: '60px' }}
-          type="number"
-          value={limit}
-          onChange={(e) => setLimit(e.target.value)}
-        />
-        Показаны
-        <Button
-          size="small"
-          variant="text"
+        Показывать строк: 
+          <TextField 
+            type="number"
+            size="small"
+            style={{ width: 50 }}
+            value={limit}
+            onChange={(e) => setLimit(e.target.value)}
+          />
+        <div>
+          {offset + 1} - {Math.min(offset + +limit, totalFiltredRows)} из {totalFiltredRows}
+        </div>
+        <IconButton
+          disabled={offset === 0}
+          onClick={() => setOffset(0)}
+        >
+          <FirstPage />
+        </IconButton>
+        <IconButton
           disabled={offset === 0}
           onClick={() => setOffset(Math.max(offset - +limit, 0))}
-          onDoubleClick={() => setOffset(0)}
         >
-          <img className="icon" src={LeftPng} alt="prev" />
-        </Button>
-        <div>
-          {offset + 1} - {Math.min(offset + +limit, totalFiltredRows)}
-        </div>
-        <Button
-          size="small"
-          variant="text"
+          <KeyboardArrowLeft />
+        </IconButton>
+        <IconButton
           disabled={totalFiltredRows <= +offset + +limit}
           onClick={() => setOffset(offset + +limit)}
-          onDoubleClick={() => setOffset(totalFiltredRows - +limit)}
         >
-          <img className="icon" src={RightPng} alt="next" />
-        </Button>
-        <span>
-          Всего отфильтровано {totalFiltredRows} из {totalRows}
-        </span>
+          <KeyboardArrowRight />
+        </IconButton>
+        <IconButton
+          disabled={totalFiltredRows <= +offset + +limit}
+          onClick={() => setOffset(totalFiltredRows - +limit)}
+        >
+          <LastPage />
+        </IconButton>
       </div>
     </div>
   )

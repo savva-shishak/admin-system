@@ -27,15 +27,15 @@ export function Page({ content, path }: { content: any[], path: string }): any {
 
   return content.map((component, id) => {
     if (component.type === 'html') {
-      return <div key={id} dangerouslySetInnerHTML={{ __html: component.payload }} />
+      return <div key={id + location.pathname} dangerouslySetInnerHTML={{ __html: component.payload }} />
     }
 
     if (component.type === 'form') {
-      return <Form key={id} config={component.config} />
+      return <Form key={id + location.pathname} config={component.config} />
     }
 
     if (component.type === 'table') {
-      return <AdaptTable key={id} config={component.config} />
+      return <AdaptTable key={id + location.pathname} config={component.config} />
     }
   })
 }

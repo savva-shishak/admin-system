@@ -35,6 +35,7 @@ function App() {
   const [content, setContent] = useState<any[]>([]);
   const [loading, setLoading] = useState(!localStorage.getItem('token'))
   const navigate = useNavigate();
+  const [title, setTitle] = useState('');
 
   useEffect(() => {
     socket.on('auth-success', (token) => {
@@ -60,6 +61,7 @@ function App() {
       }
       if (target === 'page') {
         document.title = data.title;
+        setTitle(data.title)
         setContent(data.content);
       }
       if (target === 'navigate') {
@@ -101,19 +103,18 @@ function App() {
         />
       </div>
       <div className="App__header">
-        {
-          menu.length
-          ? (
+        <div>
+          {!!menu.length && (
             <div className="App__toggle-menu" onClick={() => setOpenLeftMenu(!openLeftMenu)}>
               <span></span>
               <span></span>
               <span></span>
             </div>
-          )
-          : (
-            <div />
-          )
-        }
+          )}
+          <div className='App__title'>
+            {title}
+          </div>
+        </div>
         <Button
           variant="text"
           type="button"

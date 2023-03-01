@@ -1,9 +1,9 @@
 import moment from "moment";
 import { GetDataParams } from "../types";
 
-export const reduceArrayByParams = <Data extends object>(getData: () => Data[]) => async (params: GetDataParams) => {
+export const reduceArrayByParams = <Data extends object>(getData: () => (Data[] | Promise<Data[]>)) => async (params: GetDataParams) => {
   const { search, filter: filterArray, limit, offset, sort } = params;
-  const allData = getData();
+  const allData = await getData();
   const data = allData
     .filter((item: any) => {
       if (!search) {

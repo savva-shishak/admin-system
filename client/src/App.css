@@ -29,6 +29,12 @@
   z-index: +1;
 }
 
+.App__title {
+  font-size: 18px;
+  line-height: 18px;
+  color: white;
+}
+
 @media (max-height: 550px) {
   .App__login {
     align-items: flex-start;

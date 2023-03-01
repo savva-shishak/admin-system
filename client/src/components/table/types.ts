@@ -33,13 +33,13 @@ export type JustFilter = EnumFilter | DateFilter | NumberFilter | StringFilter |
 
 export type Column<Data> = {
   key: string,
-  width?: number,
+  width?: string | number,
   title: ReactNode,
   type: 'num' | 'date' | 'str' | 'img' | 'key',
   render: (data: Data, index: number) => ReactNode,
 } | {
   key: string,
-  width?: number,
+  width?: string | number,
   title: ReactNode,
   type: 'enum',
   values: string[],
